@@ -1,4 +1,3 @@
-Tabular view of the program
 | Tidspunkt | Søndag | Mandag | Tirsdag | Onsdag | Torsdag | Fredag |
 |-----------|-----------|-----------|-----------|-----------|-----------|-----------|
 | Formiddag | Intro til Matematik | Intro til Matematik | Intro til ML | Neurale Netværk | Neurale netværk | NLP |

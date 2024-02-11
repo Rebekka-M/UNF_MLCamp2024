@@ -1,5 +1,5 @@
 # UNF Machine Learning Camp 2024
-![Logo](0.Design_Assets/Unflogo.eps)
+![Logo](0.Design_Assets/Unflogo.eps?raw=true)
 
 Følgende GitHub Repo indeholder materiale til UNF Machine Learning Camp 2024. Campen er en del af UNF's sommercamp 2024, og er en uge med fokus på maskinlæring og kunstig intelligens. Campen er for gymnasieelever, og vil indeholde en blanding af teoretisk undervisning og praktiske øvelser.
 
@@ -12,7 +12,8 @@ Følgende GitHub Repo indeholder materiale til UNF Machine Learning Camp 2024. C
 
 ## Det faglige program
 Det faglige program af campen vil indeholde en blanding af teoretisk undervisning og praktiske øvelser. Programmet vil blive opdateret løbende.
-![Program](0.Design_Assets/Program.md)
+
+![Program](0.Design_Assets/Program.md?raw=true)
 
 ## Materialer
 Materiale til campen består af UNF kompendiet, samt dette GitHub Repo. Kompendiet indeholder teoretisk materiale, mens dette Repo indeholder praktiske øvelser og kodeeksempler.
