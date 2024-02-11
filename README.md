@@ -1,5 +1,5 @@
 # UNF Machine Learning Camp 2024
-![Logo](0.Design_Assets/Unflogo.eps?raw=true)
+<iframe width="100%" height="800" src="0.Design_Assets/Unflogo-eps-converted-to.pdf">
 
 Følgende GitHub Repo indeholder materiale til UNF Machine Learning Camp 2024. Campen er en del af UNF's sommercamp 2024, og er en uge med fokus på maskinlæring og kunstig intelligens. Campen er for gymnasieelever, og vil indeholde en blanding af teoretisk undervisning og praktiske øvelser.
 
@@ -13,7 +13,12 @@ Følgende GitHub Repo indeholder materiale til UNF Machine Learning Camp 2024. C
 ## Det faglige program
 Det faglige program af campen vil indeholde en blanding af teoretisk undervisning og praktiske øvelser. Programmet vil blive opdateret løbende.
 
-![Program](0.Design_Assets/Program.md?raw=true)
+| Tidspunkt | Søndag | Mandag | Tirsdag | Onsdag | Torsdag | Fredag |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| Formiddag | Intro til Matematik | Intro til Matematik | Intro til ML | Neurale Netværk | Neurale netværk | NLP |
+| 12:00 - 13:00 | Frokost | Frokost | Frokost | Frokost | Frokost | Frokost |
+| Eftermiddag | Intro til Programmering | Intro til Programmering | Intro til ML | Neurale Netværk | NLP | NLP |
+| Aften | Faglig / Social Cafe <br> + Sociale Aktiviteter | Faglig / Social Cafe  <br> + Sociale Aktiviteter | Faglig / Social Cafe  <br> + Sociale Aktiviteter | Faglig / Social Cafe  <br> + Sociale Aktiviteter | Faglig / Social Cafe  <br> + Sociale Aktiviteter | Fest |
 
 ## Materialer
 Materiale til campen består af UNF kompendiet, samt dette GitHub Repo. Kompendiet indeholder teoretisk materiale, mens dette Repo indeholder praktiske øvelser og kodeeksempler.
