@@ -51,11 +51,11 @@ def get_dataset(names: list,
     return (X_train, y_train), (X_val, y_val), (X_test, y_test)
 
 def plot_doodles(X, y, label_dict, n_rows: int = 5, title: str = None):
-    fig, axs = plt.subplots(n_rows, n_rows, figsize = (n_rows * 2, n_rows * 2))
+    fig, axs = plt.subplots(n_rows, n_rows, figsize = (n_rows, n_rows), constrained_layout = True)
     N = n_rows ** 2
     for i, (X_temp, y_temp) in enumerate(zip(X[:N], y[:N])):
         axs[i // n_rows, i % n_rows].imshow(X_temp, cmap='Greys')
-        axs[i // n_rows, i % n_rows].set_title(f"Label: {y_temp} ({label_dict[y_temp]})")
+        axs[i // n_rows, i % n_rows].set_title(f"Label: {y_temp}\n({label_dict[y_temp]})", fontsize = 8)
         axs[i // n_rows, i % n_rows].axis('off')
     if title is None:
         title = f"{N} doodles fra Quick, Draw! dataset"
