@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# models
+*.pt
+*.pth
+
 # C extensions
 *.so
 
@@ -25,6 +29,11 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+poetry.lock
+pyproject.toml
+
+# mlflow
+mlruns/
 
 # Numpy files
 *.npy
