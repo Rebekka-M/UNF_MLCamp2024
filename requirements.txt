@@ -1,0 +1,9 @@
+matplotlib
+tqdm
+keras-core
+fastapi
+requests
+setuptools
+mlflow
+# Also manually install the line below
+# torch torchvision --index-url https://download.pytorch.org/whl/cpu
