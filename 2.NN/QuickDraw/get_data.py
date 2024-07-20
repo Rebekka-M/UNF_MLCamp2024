@@ -1,31 +1,10 @@
 import os
-import csv
 import requests
 import typing as T
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-
-def get_doodle_names() -> T.List[str]:
-    """
-    Henter navne på labels fra Quick, Draw! dataset
-    Returns:
-    List[str]: Navne på labels
-    """
-    if os.getcwd().split('/')[-1] == 'UNF_MLCamp2024':
-        path = f'2.NN/QuickDraw/data_config.csv'
-    elif os.getcwd().split('/')[-1] == '2.NN':
-        path = f'QuickDraw/data_config.csv'
-    else:
-        path = f'data_config.csv'
-        
-    # Hent labels
-    with open(path, newline='\n') as file:
-        writer = csv.reader(file)
-        labels = [row[0] for row in writer]
-    
-    return labels
 
 def get_doodles(name: str, verbose: bool = False) -> np.ndarray:
     """
