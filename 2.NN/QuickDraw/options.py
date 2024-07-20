@@ -8,15 +8,20 @@ from torch import optim
 
 @dataclass
 class Hyperparameters:
+    # data parameters
     batch_size: T.Union[int, T.List[int]] = 32
+
+    # training parametre
+    epochs: T.Union[int, T.List[int]] = 10
+
+    # optimizer parametre
+    optimizer: optim.Optimizer = optim.SGDb
+    lr: T.Union[float, T.List[float]] = 0.001
     betas: T.Tuple[float] = (0.9, 0.999)
     dampening: float = 0
-    epochs: T.Union[int, T.List[int]] = 10
     eps: float = 1e-08,
-    lr: T.Union[float, T.List[float]] = 0.001
     momentum: T.Union[float, T.List[float]] = 0.5
     nesterov: bool = False
-    optimizer: optim.Optimizer = optim.SGD
     weight_decay: float = 0
 
 def name_generator():

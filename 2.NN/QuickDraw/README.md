@@ -20,7 +20,8 @@ QuickDraw
 ├── saved_models            # Folder hvor jeres gemte modeller i har trænet ligger i
 ├── app.py                  # Application i kan bruge til at teste gemte modeller lokalt
 ├── get_data.py             # Definerer jeres data loader til træning
-├── model.py                # ~ Her skal I definere model arkitekturen og vælge hyperparametre ~
+├── main.py                # ~ Her skal du vælge hyperparametre og træne modellen fra ~
+├── model.py                # ~ Her skal I definere model arkitekturen ~
 ├── options.py              # ~ Her kan O tilføje nye hyperparametre, hvis I vil bruge noget mere eksotisk ~
 ├── train.py                # Træningsproceduren (Niks pille ;) )
 └── README.md               # Denne fil
@@ -28,7 +29,7 @@ QuickDraw
 Det er generalt set en god ide at læse kodebasen igennem før i går igang med at bygge og træne modeller. Hvis i har spørgsmål kan i altid tage fat i faglig for at få hjælp og forklaringer.
 
 ## Arbejdsgang
-I kommer mest af alt til at arbejde fra 2 filer: `model.py` og `options.py`. Her følger lidt mere info om hvordan i kan bruge kodebasen til træning og evaluering af modeller.
+I kommer mest af alt til at arbejde fra 3 filer: `main.py`, `model.py` og `options.py`. Her følger lidt mere info om hvordan i kan bruge kodebasen til træning og evaluering af modeller.
 
 ### 1. Naviger til QuickDraw mappen
 Åben jeres terminal og skriv
@@ -36,27 +37,35 @@ I kommer mest af alt til at arbejde fra 2 filer: `model.py` og `options.py`. Her
 cd 2.NN/QuickDraw/
 ```
 
-### 2. Træn model
-Efter i har defineret en model i `model.py` filen, kan i træne den ved at følgende kommando i terminalen:
+### 2. Definer modellen
+I kan definere jeres model architektur i `model.py` filen. Overvej de ting vi har lært de seneste par dage, når i tager arkitektur valg. I kan også altid overveje at snakke med en faglig :sunglasses:
+
+### 3. Vælg hyperparametre
+Default hyperparametre er givet i `options.py`, men en default værdi. Afhængig af hvilken optimizer i gerne vil bruge, kan der være andre hyperparametre der også giver mening for jer at inkludere i klassen.
+
+I kan vælge andre værdier til en bestemt hyper parameter i `main.py`. Læg mærke til at default værdierne ikke er optimale, så hvis i gerne vil vinde konkurrencen er det nok en god ide at optimere hyperparametrene her.
+
+# 4. Træn modellen
+I træne den ved at følgende kommando i terminalen:
 ```bash
-python model.py
+python main.py
 ```
 
-Den kommando kører alt i `model.py`filen der ligger efter `if __name__ == "__main__":` linjen i filen, der gør følgende:
+Den kommando kører alt i `main.py`filen, der gør følgende:
 1. Henter dataen
-2. Definerer hyperparametre
-3. Definerer modellen
-4. Træner modellen (og logger den med mlflow)
+2. Definerer hyperparametre (efter de værdier i har indsat i `main.py`)
+3. Definerer modellen (efter den arkitektur i har bygget i `model.py`)
+4. Træner modellen (og logger den med `mlflow`)
 5. Gemmer modellen i `saved_models`
 
-### 3. Sammenlign modeller
+### 5. Sammenlign modeller
 Eftersom vi logger modellerne i `mlflow` under træning, kan vi når vi har bygget flere modeller sammenligne med visuel:
 ```bash
 mlflow server
 ```
-Hvis i derfra navigerer til `http://127.0.0.1:5000` (jeres localhost) får i et dashboard i kan bruge til at sammenligne forskellige modeller. Denne er tilgængig så længe denne kommando er aktiv
+Hvis i derfra navigerer til `http://127.0.0.1:5000` (jeres localhost) får i et dashboard i kan bruge til at sammenligne forskellige modeller. Læg mærke til at i kun kan have dashboardet åbent i én fane.
 
-### 4. Test jeres modeller
+### 6. Test jeres modeller
 Hvis I har en model i gerne vil teste ydeligere, kan i teste den i med live tegninger i `app.py`:
 ```bash
 streamlit run app.py

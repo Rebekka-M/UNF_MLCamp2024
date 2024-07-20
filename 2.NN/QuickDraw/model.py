@@ -92,42 +92,52 @@ class Net(nn.Module):
 
         return y_hat.detach().numpy()[0], y_hat_prob[0].detach().numpy()
     
-if __name__ == "__main__":
+    def save(self):
+        """
+        Gemmer modellen
+        
+        Args:
+        path (str): Sti til gemmested
+        """
+        scripted_model = torch.jit.script(self)
+        scripted_model.save(f'2.NN/QuickDraw/saved_models/{self.name}.pth')
+    
+#if __name__ == "__main__":
 
-    # Sæt valgmuligheder
-    hyperparameters = Hyperparameters(
-        lr = 0.005,
-    )
+    # # Sæt valgmuligheder
+    # hyperparameters = Hyperparameters(
+    #     lr = 0.005,
+    # )
 
-    # Hent data fra get_data.py
-    train_loader, val_loader = get_dataset(
-        names=TEGNINGER,
-        n_samples=1000,
-        batch_size=hyperparameters.batch_size,
-        verbose=True
-    )
+    # # Hent data fra get_data.py
+    # train_loader, val_loader = get_dataset(
+    #     names=TEGNINGER,
+    #     n_samples=1000,
+    #     batch_size=hyperparameters.batch_size,
+    #     verbose=True
+    # )
 
-    # Hent model architecturene fra model_architecture.py
-    model = Net(
-        name = name_generator(),
-        hyperparameters=hyperparameters
-    )
+    # # Hent model architecturene fra model_architecture.py
+    # model = Net(
+    #     name = name_generator(),
+    #     hyperparameters=hyperparameters
+    # )
 
-    # tilføj optimizer til model
-    model.optimizer = model.hyperparameters.optimizer(
-        model.parameters(),
-        lr=model.hyperparameters.lr,
-        momentum=model.hyperparameters.momentum,
-    )
-    setattr(model.hyperparameters, 'optimizer', model.optimizer.__class__.__name__)
+    # # tilføj optimizer til model
+    # model.optimizer = model.hyperparameters.optimizer(
+    #     model.parameters(),
+    #     lr=model.hyperparameters.lr,
+    #     momentum=model.hyperparameters.momentum,
+    # )
+    # setattr(model.hyperparameters, 'optimizer', model.optimizer.__class__.__name__)
 
-    # Træn modellen 
-    model_name = train(
-        train_loader,
-        val_loader,
-        model,
-    )
+    # # Træn modellen 
+    # model_name = train(
+    #     train_loader,
+    #     val_loader,
+    #     model,
+    # )
 
-    # Model er trænet, så vi gemmer den i saved_models
-    scripted_model = torch.jit.script(model)
-    scripted_model.save(f'2.NN/QuickDraw/saved_models/{model_name}.pth')
+    # # Model er trænet, så vi gemmer den i saved_models
+    # scripted_model = torch.jit.script(model)
+    # scripted_model.save(f'2.NN/QuickDraw/saved_models/{model_name}.pth')

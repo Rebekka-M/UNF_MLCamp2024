@@ -9,7 +9,7 @@ import numpy as np
 from data._data_static import TEGNINGER, dsize
 
 # Husk at ændre til den model du gerne vil teste
-MODEL_TIL_TEST = "2024-07-20-09-27-24-gaxy.pth"
+MODEL_TIL_TEST = "2024-07-20-11-08-20-snwc.pth"
 
 @st.cache_resource
 def get_model(path):
