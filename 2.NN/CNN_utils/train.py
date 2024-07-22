@@ -1,13 +1,12 @@
 import os
-import random
-import string
 import torch
 import mlflow
-from datetime import datetime
 from time import perf_counter
+from CNN_utils.options import get_hyperparameters
 
 # Sæt mlflow tracking URI og experiment
-mlflow.set_tracking_uri("")
+
+mlflow.set_tracking_uri(uri="http://127.0.0.1:5000")
 def train(
     train_loader: torch.utils.data.DataLoader, val_loader: torch.utils.data.DataLoader, model):
     """
@@ -17,39 +16,16 @@ def train(
     val_loader (torch.utils.data.DataLoader): DataLoader for valideringsdata
     model (torch.nn.Module): Netværksarkitektur
     """
-    # Hvis epochs ikke er specificeret, sæt til 2
-    if model.hyperparameters.get('epochs') is None:
-        model.hyperparameters['epochs'] = 2
-    
-    # Hvis lr ikke er specificeret, sæt til 0.001
-    if model.hyperparameters.get('lr') is None:
-        model.hyperparameters['lr'] = 0.001
-    
-    # Hvis momentum ikke er specificeret, sæt til 0.9
-    if model.hyperparameters.get('momentum') is None:
-        model.hyperparameters['momentum'] = 0.0
-
-    # tilføj loss og optimizer
-    criterion = model.criterion()
-    optimizer = model.optimizer(
-        model.parameters(),
-        lr = model.hyperparameters['lr'], momentum=model.hyperparameters['momentum'])
-
-    model.hyperparameters['loss'] = criterion.__class__.__name__
-    model.hyperparameters['optimizer'] = optimizer.__class__.__name__
-
-    # Check om CUDA er tilgængelig
-    model_name = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + '-' + ''.join(random.choices(string.ascii_lowercase,k=4))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # Start mlflow run
     mlflow.set_tracking_uri(uri="http://127.0.0.1:5000")
-    with mlflow.start_run(experiment_id="0", run_name = model_name):
+    with mlflow.start_run(experiment_id="0", run_name = model.name):
         # Log hyperparametre
-        mlflow.log_params(model.hyperparameters)
+        mlflow.log_params(get_hyperparameters(model.hyperparameters, model.optimizer))
         
         # Trænings loop over epochs
-        for epoch in range(model.hyperparameters['epochs']):
+        for epoch in range(model.hyperparameters.epochs):
             losses = []
             accuracies = []
             val_losses = []
@@ -61,14 +37,14 @@ def train(
                 X, y = X.float().to(device), y.long().to(device)
 
                 # Genstart gradienter
-                optimizer.zero_grad()
+                model.optimizer.zero_grad()
 
                 # Forward pass
                 y_hat_prob = model(X)
                 y_hat = torch.argmax(y_hat_prob, dim=1).long()
                 
                 # Beregn loss, accuracy, og validation accuracy
-                loss = criterion(y_hat_prob, y)
+                loss = model.criterion(y_hat_prob, y)
                 losses.append(loss.item())
                 accuracy = torch.sum(y_hat == y) / len(y)
                 accuracies.append(accuracy)
@@ -80,7 +56,7 @@ def train(
 
                 # Backward pass og opdatering af vægte
                 loss.backward()
-                optimizer.step()
+                model.optimizer.step()
 
                 # Print status
                 #if batch  == 0:
@@ -92,7 +68,7 @@ def train(
                 for batch, (X, y) in enumerate(val_loader):
                     X, y = X.float().to(device), y.long().to(device)
                     y_hat_prob = model(X)
-                    val_loss = criterion(y_hat_prob, y)
+                    val_loss = model.criterion(y_hat_prob, y)
                     val_losses.append(val_loss.item())
                     val_accuracy = torch.sum(torch.argmax(y_hat_prob, dim=1) == y) / len(y)
                     val_accuracies.append(val_accuracy)
@@ -103,7 +79,7 @@ def train(
                     #        f"[{epoch} / {model.hyperparameters['epochs']}] Validation: Loss: {val_loss:3f} Accuracy: {val_accuracy:3f}"
                     #    )
             end_time = perf_counter()
-            print(f"[{epoch+1} / {model.hyperparameters['epochs']} {end_time-start_time:.2f}s] Training: Loss: {sum(losses) / len(losses):3f} Accuracy: {sum(accuracies) / len(accuracies):3f} | Validation: Loss: {sum(val_losses) / len(val_losses):3f} Accuracy: {sum(val_accuracies) / len(val_accuracies):3f}")
+            print(f"[{epoch+1} / {model.hyperparameters.epochs} {end_time-start_time:.2f}s] Training - Loss: {sum(losses) / len(losses):3f} Accuracy: {sum(accuracies) / len(accuracies):3f} | Validation - Loss: {sum(val_losses) / len(val_losses):3f} Accuracy: {sum(val_accuracies) / len(val_accuracies):3f}")
             # Log loss og accuracy
             mlflow.log_metric("train_loss", sum(losses) / len(losses), step=epoch)
             mlflow.log_metric("train_accuracy", sum(accuracies) / len(accuracies), step=epoch)
@@ -115,5 +91,7 @@ def train(
         if not os.path.exists("saved_models/opgave1/"):
             os.makedirs("saved_models/opgave1/")
         
-        torch.save(model.state_dict(), f"saved_models/opgave1/{model_name}.pt")
-        print(f"Gemt modelen i saved_models/opgave1/{model_name}.pt")
+        #torch.save(model.state_dict(), f"saved_models/opgave1/{model_name}.pt")
+        scripted_model = torch.jit.script(model)
+        scripted_model.save(f'saved_models/opgave1/{model.name}.pth')
+        print(f"Gemt modelen i saved_models/opgave1/{model.name}.pt")
