@@ -35,7 +35,16 @@ class Net(nn.Module):
         setattr(self.hyperparameters, 'loss', self.criterion.__class__.__name__)
 
         # Definer lagene i netværket
-        raise NotImplementedError("Implementer Netværksarkitektur. Det sidste lag er defineret nedenunder")
+        input_size = 28
+        num_classes = C
+        #self.num_classes = num_classes
+        self.conv1 = nn.Sequential(nn.Conv2d(1, 32, 5, bias=False), nn.ReLU(inplace=True), nn.MaxPool2d(2,2))
+        self.conv2 = nn.Sequential(nn.Conv2d(32, 64, 5, bias=False), nn.ReLU(inplace=True), nn.MaxPool2d(2, 2))
+        dimension = int(64 * pow(input_size/4 - 3, 2))
+        self.fc1 = nn.Sequential(nn.Linear(dimension, 512), nn.Dropout(0.5))
+        self.fc2 = nn.Sequential(nn.Linear(512, 128), nn.Dropout(0.5))
+        self.fc3 = nn.Sequential(nn.Linear(128, num_classes))
+        
 
     def forward(self, x: torch.Tensor):
         """
@@ -47,7 +56,13 @@ class Net(nn.Module):
         Returns:
         torch.Tensor: Output tensor
         """
-        raise NotImplementedError("Implementer forward pass")
+        x = x.reshape(-1, 1, 28, 28)
+        output = self.conv1(x)
+        output = self.conv2(output)
+        output = output.view(output.size(0), -1)
+        output = self.fc1(output)
+        output = self.fc2(output)
+        output = self.fc3(output)
 
         return output
     
@@ -81,42 +96,3 @@ class Net(nn.Module):
         scripted_model = torch.jit.script(self)
         scripted_model.save(f'2.NN/QuickDraw/saved_models/{self.name}.pth')
     
-#if __name__ == "__main__":
-
-    # # Sæt valgmuligheder
-    # hyperparameters = Hyperparameters(
-    #     lr = 0.005,
-    # )
-
-    # # Hent data fra get_data.py
-    # train_loader, val_loader = get_dataset(
-    #     names=TEGNINGER,
-    #     n_samples=1000,
-    #     batch_size=hyperparameters.batch_size,
-    #     verbose=True
-    # )
-
-    # # Hent model architecturene fra model_architecture.py
-    # model = Net(
-    #     name = name_generator(),
-    #     hyperparameters=hyperparameters
-    # )
-
-    # # tilføj optimizer til model
-    # model.optimizer = model.hyperparameters.optimizer(
-    #     model.parameters(),
-    #     lr=model.hyperparameters.lr,
-    #     momentum=model.hyperparameters.momentum,
-    # )
-    # setattr(model.hyperparameters, 'optimizer', model.optimizer.__class__.__name__)
-
-    # # Træn modellen 
-    # model_name = train(
-    #     train_loader,
-    #     val_loader,
-    #     model,
-    # )
-
-    # # Model er trænet, så vi gemmer den i saved_models
-    # scripted_model = torch.jit.script(model)
-    # scripted_model.save(f'2.NN/QuickDraw/saved_models/{model_name}.pth')
