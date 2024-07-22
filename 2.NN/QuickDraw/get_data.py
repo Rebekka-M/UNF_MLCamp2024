@@ -3,8 +3,9 @@ import requests
 import typing as T
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 import torch
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
 def get_doodles(name: str, verbose: bool = False) -> np.ndarray:
     """
@@ -74,32 +75,40 @@ def get_dataset(
             print(f'Loading {name}...')
         doodles = get_doodles(name, verbose = verbose)
         # konkatener doodles og labels
-        X.append(doodles[:n_samples].reshape(n_samples, 28, 28))
-        y.append(np.full(n_samples, i))
-    
-    # Bland doodles
+        N_doodles = doodles.shape[0]
+        X.append(doodles.reshape(N_doodles, 28, 28))
+        y.append(np.full(N_doodles, i))
+
+    # split i trænings-, og validerings-sæt med stratificering
+    N = len(y)
     X = np.concatenate(X)
     y = np.concatenate(y)
-    idx = np.random.permutation(X.shape[0])
-    X, y = X[idx], y[idx]
-    N = X.shape[0]
-
-    # split i et trænings-, validerings- og test-sæt
-    n_train = (0, int((1 - val_size) * N))
-    n_val = (n_train[1], N)
-
-    X_train, y_train = X[n_train[0]:n_train[1]], y[n_train[0]:n_train[1]]
-    X_val, y_val = X[n_val[0]:n_val[1]], y[n_val[0]:n_val[1]]
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y,
+        test_size = val_size,
+        random_state = seed,
+        stratify = y
+    )
 
     # konverter til torch tensors
     X_train, y_train = torch.Tensor(X_train).float(), torch.Tensor(y_train)
     X_val, y_val = torch.Tensor(X_val).float(), torch.Tensor(y_val)
 
+    # definer datasets
+    train_dataset = TensorDataset(X_train, y_train)
+    val_dataset = TensorDataset(X_val, y_val)
+
     # opret DataLoader objekter
     train_loader = DataLoader(
-        TensorDataset(X_train, y_train), batch_size = batch_size, shuffle = False)
+        train_dataset,
+        batch_size = batch_size,
+        sampler = RandomSampler(train_dataset, num_samples = n_samples),
+    )
     val_loader = DataLoader(
-        TensorDataset(X_val, y_val), batch_size = batch_size, shuffle = False)
+        val_dataset,
+        batch_size = batch_size,
+        sampler = RandomSampler(val_dataset, num_samples = n_samples),
+    )
     
     return train_loader, val_loader
 
