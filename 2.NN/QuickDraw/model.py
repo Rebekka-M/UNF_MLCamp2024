@@ -94,5 +94,7 @@ class Net(nn.Module):
         path (str): Sti til gemmested
         """
         scripted_model = torch.jit.script(self)
+    
         scripted_model.save(f'2.NN/QuickDraw/saved_models/{self.name}.pth')
+
     
