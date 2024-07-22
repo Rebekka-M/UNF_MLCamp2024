@@ -3,10 +3,11 @@
 import torch
 import mlflow
 from torch import nn
-from dataclasses import asdict
+from options import get_hyperparameters
+from time import perf_counter
 
 # Sæt mlflow tracking URI og experiment
-mlflow.set_tracking_uri("")
+mlflow.set_tracking_uri("http://localhost:5000")
 
 def train(
     train_loader: torch.utils.data.DataLoader,
@@ -21,19 +22,27 @@ def train(
     model (torch.nn.Module): Netværksarkitektur
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Valider at modelen har en optimizer
+    if not hasattr(model, "optimizer"):
+        raise ValueError("Modelen mangler en optimizer")
     
     # Start mlflow run
     with mlflow.start_run(experiment_id="0", run_name = model.name):
         # Log hyperparametre
-        mlflow.log_params(asdict(model.hyperparameters))
-        # Sæt model til træning
-        model.train()
+        mlflow.log_params(get_hyperparameters(model.hyperparameters, model.optimizer))
         
         # Trænings loop over epochs
         for epoch in range(model.hyperparameters.epochs):
             losses = []
+            val_losses = []
             accuracies = []
             val_accuracies = []
+            start_time = perf_counter()
+
+            # Sæt model til træning
+            model.train()
+
             for batch, (X, y) in enumerate(train_loader):
                 X, y = X.float().to(device), y.long().to(device)
 
@@ -50,22 +59,32 @@ def train(
                 accuracy = torch.sum(y_hat == y) / len(y)
                 accuracies.append(accuracy)
 
-                val_X, val_y = next(iter(val_loader))
-                val_y_hat = model(val_X)
-                val_accuracy = torch.sum(torch.argmax(val_y_hat, dim=1) == val_y) / len(val_y)
-                val_accuracies.append(val_accuracy)
-
                 # Backward pass og opdatering af vægte
                 loss.backward()
                 model.optimizer.step()
 
-                # Print status
-                if batch == 0:
-                    print(
-                        f"loss: {loss:3f} accuracy: {accuracy:3f} [{epoch} / {model.hyperparameters.epochs}]"
-                    )
+            # Sæt model til evaluation
+            model.eval()
+            with torch.no_grad():
+                for batch, (val_X, val_y) in enumerate(val_loader):
+                    X_val, y_val = val_X.float().to(device), val_y.long().to(device)
+                    val_y_hat = model(val_X)
+
+                    # Beregn loss og accuracy
+                    val_loss = model.criterion(val_y_hat, val_y)
+                    val_losses.append(val_loss.item())
+                    val_accuracy = torch.sum(torch.argmax(val_y_hat, dim=1) == val_y) / len(val_y)
+                    val_accuracies.append(val_accuracy)
+
+            # Print status
+            end_time = perf_counter()
+            print(
+                f"[{epoch+1} / {model.hyperparameters.epochs} ({end_time-start_time:.2f}s)] Training - Loss: {loss:3f} Accuracy: {accuracy:3f} | Validation - Loss: {val_loss:3f} Accuracy: {val_accuracy:3f}"
+            )
 
             # Log loss og accuracy
             mlflow.log_metric("loss", sum(losses) / len(losses), step=epoch)
             mlflow.log_metric("accuracy", sum(accuracies) / len(accuracies), step=epoch)
+            mlflow.log_metric("val_loss", sum(val_losses) / len(val_losses), step=epoch)
             mlflow.log_metric("val_accuracy", sum(val_accuracies) / len(val_accuracies), step=epoch)
+            mlflow.log_metric("time_per_epoch", end_time-start_time, step=epoch)
