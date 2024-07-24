@@ -1,5 +1,5 @@
 """Modul til definering af netværksarkitektur"""
-
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -86,15 +86,23 @@ class Net(nn.Module):
 
         return y_hat.detach().numpy()[0], y_hat_prob[0].detach().numpy()
     
-    def save(self):
+    def save(self, path: str = None):
         """
         Gemmer modellen
         
         Args:
         path (str): Sti til gemmested
         """
+        # Håndter sti
+        if not path:
+            if os.path.exists("saved_models"):
+                path = f'saved_models/{self.name}.pth'
+            elif os.path.exists("QuickDraw/saved_models"):
+                path = f'QuickDraw/saved_models/{self.name}.pth'
+            else:
+                path = f'2.NN/QuickDraw/saved_models/{self.name}.pth'
         scripted_model = torch.jit.script(self)
     
-        scripted_model.save(f'2.NN/QuickDraw/saved_models/{self.name}.pth')
+        scripted_model.save(path)
 
     

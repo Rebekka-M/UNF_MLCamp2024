@@ -7,7 +7,7 @@ from options import get_hyperparameters
 from time import perf_counter
 
 # Sæt mlflow tracking URI og experiment
-mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_tracking_uri("./mlruns")
 
 def train(
     train_loader: torch.utils.data.DataLoader,
@@ -66,14 +66,14 @@ def train(
             # Sæt model til evaluation
             model.eval()
             with torch.no_grad():
-                for batch, (val_X, val_y) in enumerate(val_loader):
-                    X_val, y_val = val_X.float().to(device), val_y.long().to(device)
-                    val_y_hat = model(val_X)
+                for batch, (X_val, y_val) in enumerate(val_loader):
+                    X_val, y_val = X_val.float().to(device), y_val.long().to(device)
+                    val_y_hat_prob = model(X_val)
 
                     # Beregn loss og accuracy
-                    val_loss = model.criterion(val_y_hat, val_y)
+                    val_loss = model.criterion(val_y_hat_prob, y_val)
                     val_losses.append(val_loss.item())
-                    val_accuracy = torch.sum(torch.argmax(val_y_hat, dim=1) == val_y) / len(val_y)
+                    val_accuracy = torch.sum(torch.argmax(val_y_hat_prob, dim=1) == y_val) / len(y_val)
                     val_accuracies.append(val_accuracy)
 
             # Print status

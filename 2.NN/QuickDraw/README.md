@@ -18,9 +18,11 @@ QuickDraw
 ├── data                    # Folder til at gemme en lokal version af de data filer vi bruger til træning
 │   └── _data_static.py     # Giver labels på de klasser vi træner på (Niks pille ;) )
 ├── saved_models            # Folder hvor jeres gemte modeller i har trænet ligger i
+├── saved_models            # Folder hvor jeres gemte test session (som .csv-filer) ligger i 
+├── analyze_data.ipynb      # ~ Notebook til analysering af datasættet og dataloaderne ~
 ├── app.py                  # Application i kan bruge til at teste gemte modeller lokalt
 ├── get_data.py             # Definerer jeres data loader til træning
-├── main.py                # ~ Her skal du vælge hyperparametre og træne modellen fra ~
+├── main.py                 # ~ Her skal du vælge hyperparametre og træne modellen fra ~
 ├── model.py                # ~ Her skal I definere model arkitekturen ~
 ├── options.py              # ~ Her kan O tilføje nye hyperparametre, hvis I vil bruge noget mere eksotisk ~
 ├── train.py                # Træningsproceduren (Niks pille ;) )
@@ -37,15 +39,20 @@ I kommer mest af alt til at arbejde fra 3 filer: `main.py`, `model.py` og `optio
 cd 2.NN/QuickDraw/
 ```
 
-### 2. Definer modellen
+### 2. Analyser datasættet
+Naviger til Notebooken `analyze_data.ipynb`. Her har vi forberedt lidt dataanalyser, der giver nogle ideer om hvordan vores data er fordelt, hvordan vores gennemsnitlige doodle for et bestemt label ser ud, og hvordan klasserne loades i batches og epochs. Overvej at tage fat i en faglig og tal analyserne igennem med dem.
+
+Generelt kan data-analyserne bruges til at undersøge hvilke data punkter der muligvis kan være svære for det neurale netværk at lære. Dette kan informere hvad vi især ønsker at teste vores senere trænede modeller op imod i vores live-testing.
+
+### 3. Definer modellen
 I kan definere jeres model architektur i `model.py` filen. Overvej de ting vi har lært de seneste par dage, når i tager arkitektur valg. I kan også altid overveje at snakke med en faglig :sunglasses:
 
-### 3. Vælg hyperparametre
+### 4. Vælg hyperparametre
 Default hyperparametre er givet i `options.py`, men en default værdi. Afhængig af hvilken optimizer i gerne vil bruge, kan der være andre hyperparametre der også giver mening for jer at inkludere i klassen.
 
 I kan vælge andre værdier til en bestemt hyper parameter i `main.py`. Læg mærke til at default værdierne ikke er optimale, så hvis i gerne vil vinde konkurrencen er det nok en god ide at optimere hyperparametrene her.
 
-# 4. Træn modellen
+# 5. Træn modellen
 I træne den ved at følgende kommando i terminalen:
 ```bash
 python main.py
@@ -58,18 +65,20 @@ Den kommando kører alt i `main.py`filen, der gør følgende:
 4. Træner modellen (og logger den med `mlflow`)
 5. Gemmer modellen i `saved_models`
 
-### 5. Sammenlign modeller
+### 6. Sammenlign modeller
 Eftersom vi logger modellerne i `mlflow` under træning, kan vi når vi har bygget flere modeller sammenligne med visuel:
 ```bash
 mlflow server
 ```
 Hvis i derfra navigerer til `http://127.0.0.1:5000` (jeres localhost) får i et dashboard i kan bruge til at sammenligne forskellige modeller. Læg mærke til at i kun kan have dashboardet åbent i én fane.
 
-### 6. Test jeres modeller
-Hvis I har en model i gerne vil teste ydeligere, kan i teste den i med live tegninger i `app.py`:
+### 7. Test jeres modeller
+Hvis I gerne vil teste jeres trænede modeller med ny test data (som i selv generer) , kan i teste dem i med live tegninger i `app.py`:
 ```bash
 streamlit run app.py
 ```
+
+I frontenden har i mulighed for at opsamle modellernes prædiktioner og performance, samt at gemme denne i mappen `test_session` som .csv filer. I kan lave yderligere analyse af modellerne med disse filer for at beslutte jer for hvilken fil i indsender til konkurrencen.
 
 # :sparkles: Vi ønsker held og lykke med konkurrencen :sparkles:
 

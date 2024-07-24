@@ -4,6 +4,7 @@ import typing as T
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
@@ -44,10 +45,10 @@ def get_doodles(name: str, verbose: bool = False) -> np.ndarray:
 
 def get_dataset(
     names: T.List[str],
-    n_samples: int = 1000,
+    n_samples: int = 30000,
     seed: int = 42,
     val_size: float = 0.2,
-    batch_size: int = 32,
+    batch_size: int = 64,
     verbose: bool = False,) -> torch.utils.data.Dataset:
     """
     Indlæser et dataset bestående af doodles fra Quick, Draw! dataset
@@ -70,9 +71,7 @@ def get_dataset(
     # hent doodles for hvert label
     X = []
     y = []
-    for i, name in enumerate(names):
-        if verbose:
-            print(f'Loading {name}...')
+    for i, name in enumerate(tqdm(names, desc = f'Loading data...', disable = not verbose)):
         doodles = get_doodles(name, verbose = verbose)
         # konkatener doodles og labels
         N_doodles = doodles.shape[0]

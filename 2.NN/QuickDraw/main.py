@@ -13,12 +13,12 @@ hyperparameters = Hyperparameters(
 # Hent data fra get_data.py
 train_loader, val_loader = get_dataset(
     names=TEGNINGER,
-    n_samples=1000,
+    n_samples=30000,
     batch_size=hyperparameters.batch_size,
-    verbose=True
+    verbose = True,
 )
 
-# Hent model architecturene fra model_architecture.py
+# Hent model architecturene fra modemll_architecture.py
 model = Net(
     name = name_generator(),
     hyperparameters=hyperparameters
