@@ -13,7 +13,7 @@ def train(
     train_loader: torch.utils.data.DataLoader,
     val_loader: torch.utils.data.DataLoader,
     model: nn.Module,
-    ) -> str:
+    ) -> torch.Tensor:
     """
     Træner modellen
     Args:
@@ -88,3 +88,5 @@ def train(
             mlflow.log_metric("val_loss", sum(val_losses) / len(val_losses), step=epoch)
             mlflow.log_metric("val_accuracy", sum(val_accuracies) / len(val_accuracies), step=epoch)
             mlflow.log_metric("time_per_epoch", end_time-start_time, step=epoch)
+    
+    return sum(val_accuracies) / len(val_accuracies)

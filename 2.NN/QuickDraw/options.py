@@ -19,7 +19,7 @@ class Hyperparameters:
     lr: T.Union[float, T.List[float]] = 0.001
     betas: T.Tuple[float] = (0.9, 0.999)
     dampening: float = 0
-    eps: float = 1e-08,
+    eps: float = 1e-08
     momentum: T.Union[float, T.List[float]] = 0.5
     nesterov: bool = False
     weight_decay: float = 0
