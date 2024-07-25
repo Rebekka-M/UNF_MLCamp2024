@@ -48,6 +48,3 @@ model_name = train(
     val_loader,
     model,
 )
-
-# Model er trænet, så vi gemmer den i saved_models
-model.save()

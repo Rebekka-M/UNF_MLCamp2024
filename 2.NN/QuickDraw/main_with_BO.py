@@ -75,9 +75,6 @@ def objective(trial: optuna.Trial) -> float:
         model,
     )
 
-    # Model er trænet, så vi gemmer den i saved_models
-    model.save()
-
     return validation_accuracy
 
 study = optuna.create_study(direction='maximize')

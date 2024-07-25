@@ -33,6 +33,7 @@ def train(
         mlflow.log_params(get_hyperparameters(model.hyperparameters, model.optimizer))
         
         # Trænings loop over epochs
+        best_val_accuracy = 0
         for epoch in range(model.hyperparameters.epochs):
             losses = []
             val_losses = []
@@ -88,5 +89,10 @@ def train(
             mlflow.log_metric("val_loss", sum(val_losses) / len(val_losses), step=epoch)
             mlflow.log_metric("val_accuracy", sum(val_accuracies) / len(val_accuracies), step=epoch)
             mlflow.log_metric("time_per_epoch", end_time-start_time, step=epoch)
+        
+        if sum(val_accuracies) / len(val_accuracies) > best_val_accuracy:
+            # Vi har fundet en bedre model, så lad os gemme den
+            best_val_accuracy = sum(val_accuracies) / len(val_accuracies)
+            model.save()
     
-    return sum(val_accuracies) / len(val_accuracies)
+    return best_val_accuracy
