@@ -8,14 +8,14 @@ from tqdm import tqdm
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
 
-def get_doodles(name: str, verbose: bool = False) -> np.ndarray:
+def get_doodles(name: str, verbose: bool = False) -> torch.tensor:
     """
     Downloader billeder for et bestemt label fra Quick, Draw! dataset
     Args:
     name (str): Navnet på label
     verbose (bool): Hvis True, printes status undervejs
     Returns:
-    np.ndarray: Billeder for label
+    torch.tensor: Billeder for label
     """
     if os.getcwd().split('/')[-1] == 'UNF_MLCamp2024':
         path = f'2.NN/QuickDraw/data/{name}.npy'
@@ -39,9 +39,12 @@ def get_doodles(name: str, verbose: bool = False) -> np.ndarray:
         # Gem filen lokalt
         with open(path, 'wb') as f:
             f.write(r.content)
+
+    doodles = np.load(path)
+    N_doodles = doodles.shape[0]
     
     # Indlæs filen
-    return np.load(path)
+    return torch.Tensor(doodles.reshape(N_doodles, 28, 28)).float()
 
 def get_dataset(
     names: T.List[str],
@@ -78,14 +81,15 @@ def get_dataset(
         # konkatener doodles og labels
         N_doodles = doodles.shape[0]
         X.append(doodles.reshape(N_doodles, 28, 28))
-        y.append(np.full(N_doodles, i))
+        y.append(torch.ones(N_doodles) * i)
 
     # split i trænings-, og validerings-sæt (og måske test-sæt) med stratificering
     N = len(y)
-    X = np.concatenate(X)
-    y = np.concatenate(y)
+    X = torch.cat(X, dim=0)
+    y = torch.cat(y, dim = 0)
+
     if test_size > 0:
-        X_train, X_test, y_train, y_test = train_test_split(
+        X, X_test, y, y_test = train_test_split(
             X, y,
             test_size = test_size,
             random_state = seed,
@@ -94,40 +98,28 @@ def get_dataset(
         X, y = X_train, y_train
 
     X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train,
+        X, y,
         test_size = val_size,
         random_state = seed,
-        stratify = y_train
+        stratify = y
     )
-
-    # konverter til torch tensors
-    X_train, y_train = torch.Tensor(X_train).float(), torch.Tensor(y_train)
-    X_val, y_val = torch.Tensor(X_val).float(), torch.Tensor(y_val)
-    if test_size > 0:
-        X_test, y_test = torch.Tensor(X_test).float(), torch.Tensor(y_test)
-
-    # definer datasets
-    train_dataset = TensorDataset(X_train, y_train)
-    val_dataset = TensorDataset(X_val, y_val)
-    if test_size > 0:
-        test_dataset = TensorDataset(X_test, y_test)
 
     # opret DataLoader objekter
     train_loader = DataLoader(
-        train_dataset,
+        TensorDataset(X_train, y_train),
         batch_size = batch_size,
-        sampler = RandomSampler(train_dataset, num_samples = n_samples),
+        sampler = RandomSampler(TensorDataset(X_train, y_train), num_samples = n_samples),
     )
     val_loader = DataLoader(
-        val_dataset,
+        TensorDataset(X_val, y_val),
         batch_size = batch_size,
-        sampler = RandomSampler(val_dataset, num_samples = int(n_samples*val_size)),
+        sampler = RandomSampler(TensorDataset(X_val, y_val), num_samples = int(n_samples*val_size)),
     )
     if test_size > 0:
         test_loader = DataLoader(
-            test_dataset,
+            TensorDataset(X_test, y_test),
             batch_size = batch_size,
-            sampler = RandomSampler(test_dataset, num_samples = int(n_samples*test_size)),
+            sampler = RandomSampler(TensorDataset(X_test, y_test), num_samples = int(n_samples*test_size)),
         )
         return train_loader, val_loader, test_loader
     else:
@@ -168,3 +160,7 @@ def plot_doodles(labels: T.List[str], n_rows: int = 5, title: str = None):
         title = f"{N} doodles fra Quick, Draw! dataset"
     plt.suptitle(title)
     plt.show()
+
+if __name__ == "__main__":
+    from data._data_static import TEGNINGER
+    get_dataset(TEGNINGER, n_samples=30000, verbose=True)
