@@ -3,6 +3,7 @@ from data._data_static import TEGNINGER
 from options import Hyperparameters, name_generator
 from model import Net
 from train import train
+import torch
 
 import optuna
 from torch.optim import Adam, SGD, AdamW
@@ -76,11 +77,15 @@ def objective(trial: optuna.Trial) -> float:
         model,
     )
 
+    # Load the best model from the jit script
+    best_model = torch.jit.load(f"models/{model.name}.pt")
+
     # Calculate test accuracy and return as objective to Optuna
+
     test_accuracy = []
     for batch in test_loader:
         X_test, y_test = batch
-        y_pred, probs = model.predict(X_test)
+        y_pred, probs = best_model.predict(X_test)
         test_accuracy.append((y_pred == y_test).sum().item() / len(y_test))
 
     return sum(test_accuracy) / len(test_accuracy)
