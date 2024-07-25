@@ -95,7 +95,6 @@ def get_dataset(
             random_state = seed,
             stratify = y
         )
-        X, y = X_train, y_train
 
     X_train, X_val, y_train, y_val = train_test_split(
         X, y,
