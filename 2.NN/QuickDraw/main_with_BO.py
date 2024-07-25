@@ -8,6 +8,22 @@ import torch
 import optuna
 from torch.optim import Adam, SGD, AdamW
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def predict(model, image):
+    image = torch.tensor(image).float()
+    image = image.to(next(model.parameters()).device)
+    image = image.reshape(-1, 1, 28, 28)
+    with torch.no_grad():
+        y_hat_prob = model(image)
+        # tænk over hvad vi gerne vil gøre med sandsynlighederne
+        y_hat = torch.argmax(y_hat_prob, dim=1)
+
+    y_hat = y_hat.detach().numpy()[0]
+    y_hat_prob = y_hat_prob[0].detach().numpy()
+
+    return y_hat, y_hat_prob
+
 def objective(trial: optuna.Trial) -> float:
     # Sæt valgmuligheder
     optimizer = trial.suggest_categorical('optimizer', ["Adam", "SGD", "AdamW"])
@@ -70,6 +86,7 @@ def objective(trial: optuna.Trial) -> float:
         )
     setattr(model.hyperparameters, 'optimizer', model.optimizer.__class__.__name__)
 
+    model.to(device)
     # Træn modellen 
     train(
         train_loader,
@@ -78,14 +95,14 @@ def objective(trial: optuna.Trial) -> float:
     )
 
     # Load the best model from the jit script
-    best_model = torch.jit.load(f"models/{model.name}.pt")
+    best_model = torch.jit.load(f"saved_models/{model.name}.pth")
 
     # Calculate test accuracy and return as objective to Optuna
 
     test_accuracy = []
     for batch in test_loader:
         X_test, y_test = batch
-        y_pred, probs = best_model.predict(X_test)
+        y_pred, probs = predict(best_model, X_test)
         test_accuracy.append((y_pred == y_test).sum().item() / len(y_test))
 
     return sum(test_accuracy) / len(test_accuracy)

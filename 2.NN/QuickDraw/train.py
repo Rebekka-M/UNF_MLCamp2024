@@ -79,18 +79,23 @@ def train(
 
             # Print status
             end_time = perf_counter()
+            mean_accuracy = sum(accuracies) / len(accuracies)
+            mean_val_accuracy = sum(val_accuracies) / len(val_accuracies)
+            mean_loss = sum(losses) / len(losses)
+            mean_val_loss = sum(val_losses) / len(val_losses)
+
             print(
-                f"[{epoch+1} / {model.hyperparameters.epochs} ({end_time-start_time:.2f}s)] Training - Loss: {loss:3f} Accuracy: {accuracy:3f} | Validation - Loss: {val_loss:3f} Accuracy: {val_accuracy:3f}"
+                f"[{epoch+1} / {model.hyperparameters.epochs} ({end_time-start_time:.2f}s)] Training - Loss: {mean_loss:3f} Accuracy: {mean_accuracy:3f} | Validation - Loss: {mean_val_loss:3f} Accuracy: {mean_val_accuracy:3f}"
             )
 
             # Log loss og accuracy
-            mlflow.log_metric("loss", sum(losses) / len(losses), step=epoch)
-            mlflow.log_metric("accuracy", sum(accuracies) / len(accuracies), step=epoch)
-            mlflow.log_metric("val_loss", sum(val_losses) / len(val_losses), step=epoch)
-            mlflow.log_metric("val_accuracy", sum(val_accuracies) / len(val_accuracies), step=epoch)
+            mlflow.log_metric("loss", mean_loss, step=epoch)
+            mlflow.log_metric("accuracy", mean_accuracy, step=epoch)
+            mlflow.log_metric("val_loss", mean_val_loss, step=epoch)
+            mlflow.log_metric("val_accuracy", mean_val_accuracy, step=epoch)
             mlflow.log_metric("time_per_epoch", end_time-start_time, step=epoch)
         
-            if sum(val_accuracies) / len(val_accuracies) > best_val_accuracy:
+            if mean_val_accuracy > best_val_accuracy:
                 # Vi har fundet en bedre model, så lad os gemme den ved den nuværende epoch
-                best_val_accuracy = sum(val_accuracies) / len(val_accuracies)
+                best_val_accuracy = mean_val_accuracy
                 model.save()
