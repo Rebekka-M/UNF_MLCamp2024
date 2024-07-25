@@ -175,3 +175,4 @@ Løsninger
 .DS_Store
 data
 test_sessions/*.csv
+old_architectures.py

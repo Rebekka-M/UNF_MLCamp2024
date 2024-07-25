@@ -90,9 +90,9 @@ def train(
             mlflow.log_metric("val_accuracy", sum(val_accuracies) / len(val_accuracies), step=epoch)
             mlflow.log_metric("time_per_epoch", end_time-start_time, step=epoch)
         
-        if sum(val_accuracies) / len(val_accuracies) > best_val_accuracy:
-            # Vi har fundet en bedre model, så lad os gemme den
-            best_val_accuracy = sum(val_accuracies) / len(val_accuracies)
-            model.save()
+            if sum(val_accuracies) / len(val_accuracies) > best_val_accuracy:
+                # Vi har fundet en bedre model, så lad os gemme den ved den nuværende epoch
+                best_val_accuracy = sum(val_accuracies) / len(val_accuracies)
+                model.save()
     
     return best_val_accuracy
