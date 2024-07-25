@@ -13,7 +13,7 @@ def train(
     train_loader: torch.utils.data.DataLoader,
     val_loader: torch.utils.data.DataLoader,
     model: nn.Module,
-    ) -> torch.Tensor:
+    ) -> None:
     """
     Træner modellen
     Args:
@@ -94,5 +94,3 @@ def train(
                 # Vi har fundet en bedre model, så lad os gemme den ved den nuværende epoch
                 best_val_accuracy = sum(val_accuracies) / len(val_accuracies)
                 model.save()
-    
-    return best_val_accuracy

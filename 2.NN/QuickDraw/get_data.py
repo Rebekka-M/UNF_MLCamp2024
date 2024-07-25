@@ -48,6 +48,7 @@ def get_dataset(
     n_samples: int = 30000,
     seed: int = 42,
     val_size: float = 0.2,
+    test_size: float = 0,
     batch_size: int = 64,
     verbose: bool = False,) -> torch.utils.data.Dataset:
     """
@@ -58,6 +59,7 @@ def get_dataset(
     n_samples (int): Antal billeder per label
     seed (int): Seed for random number generator
     val_size (float): Andel af data, der skal bruges til validering
+    test_size (float): Andel af data, der skal bruges til test
     batch_size (int): Batch size
     verbose (bool): Hvis True, printes status undervejs
     Returns:
@@ -78,24 +80,37 @@ def get_dataset(
         X.append(doodles.reshape(N_doodles, 28, 28))
         y.append(np.full(N_doodles, i))
 
-    # split i trænings-, og validerings-sæt med stratificering
+    # split i trænings-, og validerings-sæt (og måske test-sæt) med stratificering
     N = len(y)
     X = np.concatenate(X)
     y = np.concatenate(y)
+    if test_size > 0:
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y,
+            test_size = test_size,
+            random_state = seed,
+            stratify = y
+        )
+        X, y = X_train, y_train
+
     X_train, X_val, y_train, y_val = train_test_split(
-        X, y,
+        X_train, y_train,
         test_size = val_size,
         random_state = seed,
-        stratify = y
+        stratify = y_train
     )
 
     # konverter til torch tensors
     X_train, y_train = torch.Tensor(X_train).float(), torch.Tensor(y_train)
     X_val, y_val = torch.Tensor(X_val).float(), torch.Tensor(y_val)
+    if test_size > 0:
+        X_test, y_test = torch.Tensor(X_test).float(), torch.Tensor(y_test)
 
     # definer datasets
     train_dataset = TensorDataset(X_train, y_train)
     val_dataset = TensorDataset(X_val, y_val)
+    if test_size > 0:
+        test_dataset = TensorDataset(X_test, y_test)
 
     # opret DataLoader objekter
     train_loader = DataLoader(
@@ -106,10 +121,17 @@ def get_dataset(
     val_loader = DataLoader(
         val_dataset,
         batch_size = batch_size,
-        sampler = RandomSampler(val_dataset, num_samples = n_samples),
+        sampler = RandomSampler(val_dataset, num_samples = int(n_samples*val_size)),
     )
-    
-    return train_loader, val_loader
+    if test_size > 0:
+        test_loader = DataLoader(
+            test_dataset,
+            batch_size = batch_size,
+            sampler = RandomSampler(test_dataset, num_samples = int(n_samples*test_size)),
+        )
+        return train_loader, val_loader, test_loader
+    else:
+        return train_loader, val_loader
 
 def plot_doodles(labels: T.List[str], n_rows: int = 5, title: str = None):
     """

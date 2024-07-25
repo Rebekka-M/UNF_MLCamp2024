@@ -35,11 +35,12 @@ def objective(trial: optuna.Trial) -> float:
         )
 
     # Hent data fra get_data.py
-    train_loader, val_loader = get_dataset(
+    train_loader, val_loader, test_loader = get_dataset(
         names=TEGNINGER,
-        n_samples=30000,
+        n_samples=100000,
         batch_size=hyperparameters.batch_size,
         verbose = True,
+        test_size = 0.2,
     )
 
     # Hent model architecturene fra model.py
@@ -69,13 +70,20 @@ def objective(trial: optuna.Trial) -> float:
     setattr(model.hyperparameters, 'optimizer', model.optimizer.__class__.__name__)
 
     # Træn modellen 
-    validation_accuracy = train(
+    train(
         train_loader,
         val_loader,
         model,
     )
 
-    return validation_accuracy
+    # Calculate test accuracy and return as objective to Optuna
+    test_accuracy = []
+    for batch in test_loader:
+        X_test, y_test = batch
+        y_pred, probs = model.predict(X_test)
+        test_accuracy.append((y_pred == y_test).sum().item() / len(y_test))
+
+    return sum(test_accuracy) / len(test_accuracy)
 
 study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=200)
